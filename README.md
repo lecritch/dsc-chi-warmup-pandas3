@@ -2,6 +2,8 @@
 
 ![](viz/pandas_exercise.gif)
 
+Don't worry about completing this if you're in a time-crunch with other material!  The strong panda will be here when you get back.
+
 
 ```python
 
@@ -52,9 +54,9 @@ econ_stats = pd.read_csv('data/econ_stats.csv')
 
 Take a look at `econ_stats.head()`, `econ_stats.info()` and `econ_stats.describe(include='all')`
 
-How many unique values are in the categorical variables "Country" and "Stat"?  If some repeat, what are they?
+How many unique values are in the categorical variables `Country` and `Stat`?  If some repeat, what are they?
 
-How many unique values in the numerical variables "Year" and "Data"?  If some repeat, what are they?
+How many unique values in the numerical variables `Year` and `Data`?  If some repeat, what are they?
 
 How does the data appear to be organized?
 
@@ -98,18 +100,18 @@ unique piece of data
     dtypes: float64(1), int64(1), object(2)
     memory usage: 4.8+ KB
     None
-           Country         Year                  Stat        Data
-    count      150   150.000000                   150  150.000000
-    unique       5          NaN                     3         NaN
-    top         US          NaN  Domestic Wheat Price         NaN
-    freq        30          NaN                    50         NaN
-    mean       NaN  1960.500000                   NaN   82.056109
-    std        NaN     2.881904                   NaN   33.415946
-    min        NaN  1956.000000                   NaN    8.157261
-    25%        NaN  1958.000000                   NaN   58.285550
-    50%        NaN  1960.500000                   NaN   81.394829
-    75%        NaN  1963.000000                   NaN  106.787937
-    max        NaN  1965.000000                   NaN  154.399830
+           Country         Year           Stat        Data
+    count      150   150.000000            150  150.000000
+    unique       5          NaN              3         NaN
+    top         US          NaN  Wheat Imports         NaN
+    freq        30          NaN             50         NaN
+    mean       NaN  1960.500000            NaN   82.056109
+    std        NaN     2.881904            NaN   33.415946
+    min        NaN  1956.000000            NaN    8.157261
+    25%        NaN  1958.000000            NaN   58.285550
+    50%        NaN  1960.500000            NaN   81.394829
+    75%        NaN  1963.000000            NaN  106.787937
+    max        NaN  1965.000000            NaN  154.399830
     There are 5 unique values in Country
     There are 10 unique values in Year
     There are 3 unique values in Stat
@@ -363,6 +365,9 @@ econ_stats.head()
 # )])
 ```
 
+    Expect 5 frames, have 5
+
+
 
 
 
@@ -450,25 +455,32 @@ econ_stats.head()
 
 In our case, we want to make a new column `Wheat Imports` that:
 - has the value of `Data` when `Stat` == `"Wheat Imports"`
-- replaces the values of `Data` where `Stat` != `"Wheat Imports"` with the above value for the right `Country`/`Year` combination
+- replaces the values of `Data` where `Stat` != `"Wheat Imports"` with the values of `Data` when `Stat` == `"Wheat Imports"` (for the right `Country`/`Year` combination)
 
 `.where()` as a method takes two parameters:
-- a conditional which returns `True` or `False`
-- a replacement value when the conditional is `False`
+- a series or dataframe of `True` or `False` statements
+- a replacement object to take substitute values from when the statments are `False`
 
-So: if the condition is `True`, the original value is kept.  If `False`, the new value is substituted.  
+It works like this: 
+- at indices where the first argument is `True`, the value in the original column at that index is kept. 
+- at indices where the first argument is `False`, the value from the second argument at that index is substituted.   
 
-Both the condition and the replacement can be a series or a dataframe.  If they are series/dataframes, when the condition is `False`, the value of the original series/dataframe is substituted with the value from the replacement series/dataframe at the same index.
+Both parameters can be a series or a dataframe.  
 
 *Ex: `a` = pd.Series([1,2,3,4,5,6]), `b` = pd.Series([0,-1,-2,-3,-4,-5])*
 
 *`a.where(a%2==0, b)` = 0,2,-2,4,-4,6*
 
+<i>"At indices where the value of `a` at that index is divisible by 2, keep the value of `a` at that index. At indices where the `a` value is not divisible by 2, substitute the value of `b` at that index."</i>
+
 To make the `Wheat Imports` column:
-- append the `.where()` method to econ_stats['Data']
-- make the conditional in the first parameter that the `Stat` column is equal to `"Wheat Imports"`
-    - if `True`, we'll get the `Data` value when `Stat` == `"Wheat Imports"`
-- to create the series (the values of `Data` where `Stat`==`"Wheat Imports"`) to substitute when the conditional is `False`:
+- append the `.where()` method to `econ_stats['Data']`
+- for the first argument - a series or dataframe which has `True`/`False` statements at every value - create a series where each value states whether the `Stat` column at that index is equal to `"Wheat Imports"`.  
+
+*Hint: you would use this series to filter `econ_stats` to show rows where `Stat`==`"Wheat Imports"`*
+
+- where this series is `True`, the value at that index of `Data` will be kept.
+- to create the series (the values of `Data` where `Stat`==`"Wheat Imports"`) to use as the second argument:
     - filter `econ_stats` to only show rows where `Stat` has the value of `Wheat Imports`
     - select the 'Data' column from that frame
     - [repeat](https://pandas.pydata.org/pandas-docs/version/0.25.0/reference/api/pandas.Series.repeat.html) the values 3 times (why?)
@@ -605,6 +617,11 @@ print(f'number of dupes {econ_stats.duplicated().sum()}')
 econ_stats.drop_duplicates(inplace=True)
 
 print(f'len after dropping {len(econ_stats)}')
+
+#used for tests
+# pkl_dump([
+#     (econ_stats, 'dropped_rows')
+# ])
 ```
 
     len before dropping 150
@@ -625,6 +642,8 @@ Call each new column `"Country+existing data column name"`
 Use whichever method you think is fastest, but apply the method dynamically (eg write the same code 15 times with some values changed)
 
 Drop the `Country` column and the three data columns after you're done, so that the frame is just `Year` and the fifteen new data columns
+
+Drop the duplicated rows, and check your work!
 
 
 ```python
