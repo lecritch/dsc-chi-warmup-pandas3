@@ -2,6 +2,8 @@
 
 ![](viz/pandas_exercise.gif)
 
+Don't worry about completing this if you're in a time-crunch with other material!  The strong panda will be here when you get back.
+
 
 ```python
 # Run this cell w/o changes to load tests
@@ -38,9 +40,9 @@ Assign it to the variable econ_stats
 
 Take a look at `econ_stats.head()`, `econ_stats.info()` and `econ_stats.describe(include='all')`
 
-How many unique values are in the categorical variables "Country" and "Stat"?  If some repeat, what are they?
+How many unique values are in the categorical variables `Country` and `Stat`?  If some repeat, what are they?
 
-How many unique values in the numerical variables "Year" and "Data"?  If some repeat, what are they?
+How many unique values in the numerical variables `Year` and `Data`?  If some repeat, what are they?
 
 How does the data appear to be organized?
 
@@ -133,25 +135,32 @@ run_test(econ_stats['Wheat Exports'], 'wheat_exports_column')
 
 In our case, we want to make a new column `Wheat Imports` that:
 - has the value of `Data` when `Stat` == `"Wheat Imports"`
-- replaces the values of `Data` where `Stat` != `"Wheat Imports"` with the above value for the right `Country`/`Year` combination
+- replaces the values of `Data` where `Stat` != `"Wheat Imports"` with the values of `Data` when `Stat` == `"Wheat Imports"` (for the right `Country`/`Year` combination)
 
 `.where()` as a method takes two parameters:
-- a conditional which returns `True` or `False`
-- a replacement value when the conditional is `False`
+- a series or dataframe of `True` or `False` statements
+- a replacement object to take substitute values from when the statments are `False`
 
-So: if the condition is `True`, the original value is kept.  If `False`, the new value is substituted.  
+It works like this: 
+- at indices where the first argument is `True`, the value in the original column at that index is kept. 
+- at indices where the first argument is `False`, the value from the second argument at that index is substituted.   
 
-Both the condition and the replacement can be a series or a dataframe.  If they are series/dataframes, when the condition is `False`, the value of the original series/dataframe is substituted with the value from the replacement series/dataframe at the same index.
+Both parameters can be a series or a dataframe.  
 
 *Ex: `a` = pd.Series([1,2,3,4,5,6]), `b` = pd.Series([0,-1,-2,-3,-4,-5])*
 
 *`a.where(a%2==0, b)` = 0,2,-2,4,-4,6*
 
+<i>"At indices where the value of `a` at that index is divisible by 2, keep the value of `a` at that index. At indices where the `a` value is not divisible by 2, substitute the value of `b` at that index."</i>
+
 To make the `Wheat Imports` column:
-- append the `.where()` method to econ_stats['Data']
-- make the conditional in the first parameter that the `Stat` column is equal to `"Wheat Imports"`
-    - if `True`, we'll get the `Data` value when `Stat` == `"Wheat Imports"`
-- to create the series (the values of `Data` where `Stat`==`"Wheat Imports"`) to substitute when the conditional is `False`:
+- append the `.where()` method to `econ_stats['Data']`
+- for the first argument - a series or dataframe which has `True`/`False` statements at every value - create a series where each value states whether the `Stat` column at that index is equal to `"Wheat Imports"`.  
+
+*Hint: you would use this series to filter `econ_stats` to show rows where `Stat`==`"Wheat Imports"`*
+
+- where this series is `True`, the value at that index of `Data` will be kept.
+- to create the series (the values of `Data` where `Stat`==`"Wheat Imports"`) to use as the second argument:
     - filter `econ_stats` to only show rows where `Stat` has the value of `Wheat Imports`
     - select the 'Data' column from that frame
     - [repeat](https://pandas.pydata.org/pandas-docs/version/0.25.0/reference/api/pandas.Series.repeat.html) the values 3 times (why?)
@@ -188,6 +197,12 @@ We now have a bunch of duplicated rows
 #Your code here
 ```
 
+
+```python
+#run this cell to test your work
+run_test(econ_stats, 'dropped_rows')
+```
+
 ## Strrrretch goal: your turn
 
 You may notice that we can continue the "widening" process further, by making columns for each `Country`'s data and having `Year` the only column left from our original frame
@@ -202,6 +217,8 @@ Use whichever method you think is fastest, but apply the method dynamically (eg 
 
 Drop the `Country` column and the three data columns after you're done, so that the frame is just `Year` and the fifteen new data columns
 
+Drop the duplicated rows, and check your work!
+
 
 ```python
 #Your code here
@@ -211,4 +228,14 @@ Drop the `Country` column and the three data columns after you're done, so that 
 ```python
 #run this cell to test your work
 run_test(econ_stats, 'stretch_goal')
+```
+
+
+```python
+
+```
+
+
+```python
+
 ```
